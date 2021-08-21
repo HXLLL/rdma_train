@@ -1,9 +1,11 @@
-CC=gcc
+CFLAGS	:= -g3 -Wall
+LD		:= gcc
+LDFLAGS	:= ${LDFLAGS} -libverbs
 
 all: client server
 
 client: client.c
-	$(CC) client.c -o client
+	$(LD) $(CFLAGS) client.c -o client $(LDFLAGS)
 
 server: server.c
-	$(CC) server.c -o server
+	$(CC) $(CFLAGS) server.c -o server $(LDFLAGS)

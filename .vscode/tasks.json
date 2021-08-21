@@ -11,6 +11,17 @@
 			"group": {
 				"kind": "build",
 				"isDefault": true
+			}
+		},
+		{
+			"type": "shell",
+			"label": "test write_poll server",
+			"command": "./write_poll/server",
+			"args": [
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": true
 			},
 		}
 	]
