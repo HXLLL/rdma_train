@@ -2,10 +2,16 @@ CFLAGS	:= -g3 -Wall
 LD		:= gcc
 LDFLAGS	:= ${LDFLAGS} -libverbs -lmemcached
 
-all: client server
+APPS	:= client server
 
-client: client.c
-	$(LD) $(CFLAGS) client.c -o client $(LDFLAGS)
+all: ${APPS}
 
-server: server.c
-	$(CC) $(CFLAGS) server.c -o server $(LDFLAGS)
+client: client.c hrd.o
+	$(LD) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+server: server.c hrd.o
+	$(LD) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+.PHONY: clean
+clean:
+	rm -f *.o ${APPS}

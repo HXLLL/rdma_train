@@ -2,6 +2,7 @@
     "C_Cpp.default.compilerPath": "/usr/include/",
     "files.associations": {
         "stdio.h": "c",
-        "verbs.h": "c"
+        "verbs.h": "c",
+        "hrd.h": "c"
     }
 }
