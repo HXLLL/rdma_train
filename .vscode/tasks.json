@@ -16,7 +16,12 @@
 		{
 			"type": "shell",
 			"label": "test write_poll server",
-			"command": "./write_poll/server",
+			"command": [
+				"cd write_poll;",
+				"make;",
+				"./server;",
+			],
+			// "command": "cd write_poll; make; ./server",
 			"args": [
 			],
 			"group": {
