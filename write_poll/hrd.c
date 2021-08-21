@@ -90,3 +90,7 @@ int publish_qp(struct hrd_ctrl_blk *cb, char *key) {
 
     return 0;
 }
+
+struct host_attr query_qp(char *key, struct host_attr *attr) {
+
+}
