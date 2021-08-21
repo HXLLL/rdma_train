@@ -2,10 +2,24 @@
 #include <stdio.h>
 #include <string.h>
 #include <infiniband/verbs.h>
+#include <libmemcached/memcached.h>
+
+#define PORT_NUM 1
+#define GID_INDEX 3
+#define REGISTRY_IP "192.168.2.1"
+#define REGISTRY_PORT 8888
+
+#define CPE(val, msg)                                                    \
+    if (val) {                                                           \
+        fprintf(stderr, msg);                                            \
+        fprintf(stderr, " Error %d %s \n", errno, strerror(errno));      \
+        exit(1);                                                         \
+    }
 
 struct host_attr {
     union ibv_gid dgid;
 };
+union ibv_gid server_gid;
 
 struct ibv_context* create_context(char* name) {
     struct ibv_context* ctx = NULL;
@@ -23,11 +37,15 @@ struct ibv_context* create_context(char* name) {
             ctx = ibv_open_device(devices[i]);
         }
     }
+
     ibv_free_device_list(devices);
     if (!ctx) {
         fprintf(stderr, "Error opening device");
         return NULL;
     }
+
+    ibv_query_gid(ctx, PORT_NUM, GID_INDEX, &server_gid);
+
     return ctx;
 }
 
@@ -49,8 +67,29 @@ struct ibv_qp* create_qp(struct ibv_pd *pd, struct ibv_cq *cq) {
     return ibv_create_qp(pd, &qp_create_attr);
 }
 
-int publish_qp(struct host_attr *attr, size_t size) { 
+memcached_st* create_memc() {
+    memcached_server_st *servers = NULL;
+    memcached_st *memc = memcached_create(NULL);
+    memcached_return rc;
 
+    servers = memcached_server_list_append(servers, REGISTRY_IP,
+                                           REGISTRY_PORT, &rc);
+
+    rc = memcached_server_push(memc, servers);
+    CPE(rc != MEMCACHED_SUCCESS, "failed to push memcached server");
+
+    return memc;
+}
+
+int publish_host_attr(struct host_attr *attr, size_t len) { 
+    memcached_st *memc = create_memc();
+    memcached_return rc;
+    char *server_key="server-handler";
+
+    rc = memcached_set(memc, server_key, strlen(server_key), (char*)attr, len, 0, 0);
+    CPE(rc != MEMCACHED_SUCCESS, "failed to set key-value pair");
+
+    return 0;
 }
 
 int main() { 
@@ -58,6 +97,7 @@ int main() {
     fprintf(stderr, "Creating context\n");
 
     struct ibv_context *ctx = create_context("mlx5_0");
+
     struct ibv_pd *pd = ibv_alloc_pd(ctx);
     if (pd == NULL) {
         fprintf(stderr, "Allocate PD: %d %s\n", errno, strerror(errno));
@@ -75,6 +115,12 @@ int main() {
         fprintf(stderr, "Create QP: %d %s\n", errno, strerror(errno));
         return -1;
     }
+
+    struct host_attr server_attr;
+    memset(&server_attr, 0, sizeof(server_attr));
+    server_attr.dgid = server_gid;
+    fprintf(stderr, "%llx %llx\n", server_attr.dgid.global.subnet_prefix, server_attr.dgid.global.interface_id);
+    publish_host_attr(&server_attr, sizeof(server_attr));
 
     return 0;
 }

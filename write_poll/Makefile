@@ -1,6 +1,6 @@
 CFLAGS	:= -g3 -Wall
 LD		:= gcc
-LDFLAGS	:= ${LDFLAGS} -libverbs
+LDFLAGS	:= ${LDFLAGS} -libverbs -lmemcached
 
 all: client server
 
