@@ -1,3 +1,7 @@
 CC=gcc
-all: main.c
+client: client.c
+	$(CC) client.c -o client
+server: server.c
+	$(CC) server.c -o server
+all: client server
 	$(CC) main.c -o write_poll
