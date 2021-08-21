@@ -75,7 +75,7 @@ memcached_st* create_memc() {
     return memc;
 }
 
-int publish_qp(struct hrd_ctrl_blk *cb, char *key) { 
+int hrd_publish_qp(struct hrd_ctrl_blk *cb, char *key) { 
     struct host_attr attr;
     memset(&attr, 0, sizeof(attr));
     attr.dgid = cb->dgid;
@@ -91,6 +91,29 @@ int publish_qp(struct hrd_ctrl_blk *cb, char *key) {
     return 0;
 }
 
-struct host_attr query_qp(char *key, struct host_attr *attr) {
+struct host_attr *hrd_query_qp(char *key) {
+    memcached_st *memc = create_memc();
+    memcached_return rc;
 
+    struct host_attr *remote_qp = 
+        (struct host_attr*)memcached_get(memc, key, strlen(key), NULL, NULL, &rc);
+
+    memcached_free(memc);
+    return remote_qp;
+}
+
+void hrd_dump_ctrl_blk(struct hrd_ctrl_blk *cb) { 
+    fprintf(stderr, "Device: %s\n", cb->dev_name);
+    fprintf(stderr, "gid index: %d\n", cb->gid_index);
+    for (int i=0;i!=16;++i) {
+        fprintf(stderr, "%2x:", cb->dgid.raw[i]);
+    }
+    fprintf(stderr, "\n");
+}
+
+void hrd_dump_dgid(union ibv_gid gid) {
+    for (int i=0;i!=16;++i) {
+        fprintf(stderr, "%2x:", gid.raw[i]);
+    }
+    fprintf(stderr, "\n");
 }

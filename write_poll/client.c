@@ -7,7 +7,7 @@ int main() {
 
     cb = hrd_ctrl_blk_init("mlx5_0", 3);
     
-    publish_qp(cb, "client-qp");
+    hrd_publish_qp(cb, "client-qp");
 
     return 0;
 }

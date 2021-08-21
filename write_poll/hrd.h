@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <infiniband/verbs.h> 
 #include <libmemcached/memcached.h>
@@ -19,7 +20,6 @@
         fprintf(stderr, " Error %d %s \n", errno, strerror(errno));      \
         exit(1);                                                         \
     }
-
 
 struct hrd_ctrl_blk { 
     union ibv_gid dgid;
@@ -49,6 +49,9 @@ struct hrd_ctrl_blk *hrd_ctrl_blk_init(
 int hrd_create_qp(struct hrd_ctrl_blk *cb);
 
 memcached_st* create_memc();
-int publish_qp(struct hrd_ctrl_blk *cb, char *key);
+int hrd_publish_qp(struct hrd_ctrl_blk *cb, char *key);
+struct host_attr *hrd_query_qp(char *key);
 
+void hrd_dump_ctrl_blk(struct hrd_ctrl_blk *cb);
+void hrd_dump_dgid(union ibv_gid gid);
 #endif /* HRD_H */
