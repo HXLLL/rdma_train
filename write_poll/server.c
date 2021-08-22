@@ -20,5 +20,7 @@ int main() {
     
     fprintf(stderr, "Successfully get client qp!");
 
+    hrd_connect_qp(cb, client_attr);
+
     return 0;
 }

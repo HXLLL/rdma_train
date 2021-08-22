@@ -9,6 +9,8 @@
 #include <infiniband/verbs.h> 
 #include <libmemcached/memcached.h>
 
+#define HRD_DEFAULT_PSN 2333
+
 #define PORT_NUM 1
 #define GID_INDEX 3
 #define REGISTRY_IP "192.168.2.1"
@@ -41,12 +43,14 @@ struct hrd_ctrl_blk {
 
 struct host_attr {
     union ibv_gid dgid;
+    int qpn;
 };
 
 struct hrd_ctrl_blk *hrd_ctrl_blk_init(
     char* dev_name, int gid_index
 );
 int hrd_create_qp(struct hrd_ctrl_blk *cb);
+int hrd_connect_qp(struct hrd_ctrl_blk *cb, struct host_attr *remote_qp_attr);
 
 memcached_st* create_memc();
 int hrd_publish_qp(struct hrd_ctrl_blk *cb, char *key);

@@ -57,8 +57,48 @@ int hrd_create_qp(struct hrd_ctrl_blk *cb) {
     qp_create_attr.cap.max_inline_data = 128;
 
     cb->qp = ibv_create_qp(cb->pd, &qp_create_attr);
+    CPE(cb->qp == NULL, "Error creating QP ");
+
+    struct ibv_qp_attr init_attr;
+    memset(&init_attr, 0, sizeof(init_attr));
+    init_attr.qp_state = IBV_QPS_INIT;
+    init_attr.pkey_index = 0;
+    init_attr.port_num = PORT_NUM;
+    init_attr.qp_access_flags = IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE;
+
+    int ret;
+    ret = ibv_modify_qp(cb->qp, &init_attr, IBV_QP_STATE | IBV_QP_PKEY_INDEX | IBV_QP_PORT | IBV_QP_ACCESS_FLAGS);
+    CPE(ret != 0, "Failed to modify QP to INIT state");
     
     return 0;
+}
+
+int hrd_connect_qp(struct hrd_ctrl_blk *cb, struct host_attr *remote_qp_attr) {
+    struct ibv_qp_attr rtr_attr;
+    memset(&rtr_attr, 0, sizeof(rtr_attr));
+    rtr_attr.qp_state = IBV_QPS_RTR;
+    rtr_attr.path_mtu = IBV_MTU_2048;
+    rtr_attr.dest_qp_num = remote_qp_attr->qpn;
+    rtr_attr.rq_psn = HRD_DEFAULT_PSN;
+
+    rtr_attr.ah_attr.is_global = 1;
+    rtr_attr.ah_attr.sl = 0;
+    rtr_attr.ah_attr.port_num = PORT_NUM;
+    rtr_attr.ah_attr.grh.dgid = remote_qp_attr->dgid;
+    rtr_attr.ah_attr.grh.hop_limit = 1;
+    rtr_attr.ah_attr.grh.sgid_index = cb->gid_index;
+
+    rtr_attr.max_dest_rd_atomic = 16;
+    rtr_attr.min_rnr_timer = 12;
+
+    int ret;
+    ret = ibv_modify_qp(cb->qp, &rtr_attr, IBV_QP_STATE | IBV_QP_PATH_MTU | IBV_QP_DEST_QPN
+                    | IBV_QP_RQ_PSN | IBV_QP_AV | IBV_QP_MAX_DEST_RD_ATOMIC | IBV_QP_MIN_RNR_TIMER);
+    CPE(ret != 0, "Failed to modify QP to RTR");
+
+    if (cb->qp->state == IBV_QPS_RTR) {
+        fprintf(stderr, "Successfully modify QP to RTR");
+    }
 }
 
 memcached_st* create_memc() {
@@ -79,6 +119,7 @@ int hrd_publish_qp(struct hrd_ctrl_blk *cb, char *key) {
     struct host_attr attr;
     memset(&attr, 0, sizeof(attr));
     attr.dgid = cb->dgid;
+    attr.qpn = cb->qp->qp_num;
 
     memcached_st *memc = create_memc();
     memcached_return rc;
