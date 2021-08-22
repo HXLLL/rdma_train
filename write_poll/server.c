@@ -2,6 +2,7 @@
 
 struct hrd_ctrl_blk *cb;
 
+
 int main() { 
     fprintf(stderr, "Starting server...\n");
 
@@ -21,6 +22,12 @@ int main() {
     fprintf(stderr, "Successfully get client qp!\n");
 
     hrd_connect_qp(cb, client_attr);
+
+    while (1) {
+        write(STDOUT_FILENO, (char*)cb->buffer, 1);
+        puts("");
+        usleep(100000);
+    }
 
     return 0;
 }

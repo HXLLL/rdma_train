@@ -2,6 +2,29 @@
 
 struct hrd_ctrl_blk *cb;
 
+void rdma_write_string(struct hrd_ctrl_blk *cb, struct host_attr *attr, char *s, size_t len) {
+    struct ibv_send_wr wr;
+    memset(&wr, 0, sizeof(wr));
+    wr.wr_id = 100;
+    wr.next = NULL;
+    wr.num_sge = 1;
+    wr.opcode = IBV_WR_RDMA_WRITE;
+    wr.send_flags = IBV_SEND_INLINE;
+    wr.wr.rdma.remote_addr = attr->mr_addr;
+    wr.wr.rdma.rkey = attr->rkey;
+
+    struct ibv_sge *send_sge = (struct ibv_sge*) malloc(sizeof(struct ibv_sge));
+    strncpy(cb->buffer, s, len);
+    send_sge->addr = cb->buffer;
+    send_sge->length = len;
+    send_sge->lkey = cb->mr->lkey;
+    wr.sg_list = send_sge;
+
+    int ret;
+    ret = ibv_post_send(cb->qp, &wr, NULL);
+    CPE(ret, "Error posting write operation.", ret);
+}
+
 int main() {
     fprintf(stderr, "Starting client...\n");
 
@@ -19,6 +42,12 @@ int main() {
     }
 
     hrd_connect_qp(cb, server_attr);
+    char *s = "hello world!";
+    int len=strlen(s);
+    for (int i=0;i!=len;++i) {
+        rdma_write_string(cb, server_attr, s+i, 1);
+        usleep(400000);
+    }
 
     return 0;
 }
