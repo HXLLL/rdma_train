@@ -11,6 +11,8 @@
 
 #define HRD_DEFAULT_PSN 2333
 
+#define MAX_OUT 16
+#define BLK_SIZE 16
 #define BUFFER_SIZE 2048
 #define PORT_NUM 1
 #define GID_INDEX 3
