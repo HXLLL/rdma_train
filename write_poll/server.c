@@ -2,7 +2,6 @@
 
 struct hrd_ctrl_blk *cb;
 
-
 int main() { 
     fprintf(stderr, "Starting server...\n");
 
@@ -25,7 +24,7 @@ int main() {
 
     while (1) {
         write(STDOUT_FILENO, (char*)cb->buffer, 1);
-        puts("");
+        write(STDOUT_FILENO, "\n", 1);
         usleep(100000);
     }
 

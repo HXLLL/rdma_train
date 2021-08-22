@@ -45,7 +45,7 @@ struct hrd_ctrl_blk *hrd_ctrl_blk_init(
 
 int hrd_create_qp(struct hrd_ctrl_blk *cb) {
 
-    cb->cq = ibv_create_cq(cb->ctx, 16, NULL, NULL, 0);
+    cb->cq = ibv_create_cq(cb->ctx, 128, NULL, NULL, 0);
     CPE(cb->cq == NULL, "Error Allocating CQ: ", -1);
 
     struct ibv_qp_init_attr qp_create_attr;
@@ -102,10 +102,6 @@ int hrd_connect_qp(struct hrd_ctrl_blk *cb, struct host_attr *remote_qp_attr) {
                     | IBV_QP_RQ_PSN | IBV_QP_AV | IBV_QP_MAX_DEST_RD_ATOMIC | IBV_QP_MIN_RNR_TIMER);
     CPE(ret != 0, "Failed to modify QP to RTR", ret);
 
-    if (cb->qp->state == IBV_QPS_RTR) {
-        fprintf(stderr, "Successfully modify QP to RTR\n");
-    }
-
     struct ibv_qp_attr rts_attr;
     memset(&rts_attr, 0, sizeof(rts_attr));
     rts_attr.qp_state = IBV_QPS_RTS;
@@ -119,7 +115,7 @@ int hrd_connect_qp(struct hrd_ctrl_blk *cb, struct host_attr *remote_qp_attr) {
     CPE(ret != 0, "Failed to modify QP to RTS", ret);
 
     if (cb->qp->state == IBV_QPS_RTS) {
-        fprintf(stderr, "Successfully modify QP to RTS\n");
+        fprintf(stderr, "Connection Successful\n");
     }
 
     return 0;
