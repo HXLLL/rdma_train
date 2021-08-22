@@ -24,13 +24,13 @@ struct hrd_ctrl_blk *hrd_ctrl_blk_init(
         }
     }
     ibv_free_device_list(devices);
-    CPE(cb->ctx == NULL, "Error opening device");
+    CPE(cb->ctx == NULL, "Error opening device", -1);
 
     cb->gid_index = gid_index;
     ibv_query_gid(cb->ctx, PORT_NUM, gid_index, &cb->dgid);             // set dgid, gid_index
 
     cb->pd = ibv_alloc_pd(cb->ctx);                                     // set pd
-    CPE(cb->pd == NULL, "Allocate PD Error: ")
+    CPE(cb->pd == NULL, "Allocate PD Error: ", -1)
 
     hrd_create_qp(cb);                                                  // set cq, qp
 
@@ -40,7 +40,7 @@ struct hrd_ctrl_blk *hrd_ctrl_blk_init(
 int hrd_create_qp(struct hrd_ctrl_blk *cb) {
 
     cb->cq = ibv_create_cq(cb->ctx, 16, NULL, NULL, 0);
-    CPE(cb->cq == NULL, "Error Allocating CQ: ");
+    CPE(cb->cq == NULL, "Error Allocating CQ: ", -1);
 
     struct ibv_qp_init_attr qp_create_attr;
     memset(&qp_create_attr, 0, sizeof(qp_create_attr));
@@ -57,7 +57,7 @@ int hrd_create_qp(struct hrd_ctrl_blk *cb) {
     qp_create_attr.cap.max_inline_data = 128;
 
     cb->qp = ibv_create_qp(cb->pd, &qp_create_attr);
-    CPE(cb->qp == NULL, "Error creating QP ");
+    CPE(cb->qp == NULL, "Error creating QP ", -1);
 
     struct ibv_qp_attr init_attr;
     memset(&init_attr, 0, sizeof(init_attr));
@@ -68,7 +68,7 @@ int hrd_create_qp(struct hrd_ctrl_blk *cb) {
 
     int ret;
     ret = ibv_modify_qp(cb->qp, &init_attr, IBV_QP_STATE | IBV_QP_PKEY_INDEX | IBV_QP_PORT | IBV_QP_ACCESS_FLAGS);
-    CPE(ret != 0, "Failed to modify QP to INIT state");
+    CPE(ret != 0, "Failed to modify QP to INIT state", ret);
     
     return 0;
 }
@@ -94,11 +94,31 @@ int hrd_connect_qp(struct hrd_ctrl_blk *cb, struct host_attr *remote_qp_attr) {
     int ret;
     ret = ibv_modify_qp(cb->qp, &rtr_attr, IBV_QP_STATE | IBV_QP_PATH_MTU | IBV_QP_DEST_QPN
                     | IBV_QP_RQ_PSN | IBV_QP_AV | IBV_QP_MAX_DEST_RD_ATOMIC | IBV_QP_MIN_RNR_TIMER);
-    CPE(ret != 0, "Failed to modify QP to RTR");
+    CPE(ret != 0, "Failed to modify QP to RTR", ret);
 
     if (cb->qp->state == IBV_QPS_RTR) {
-        fprintf(stderr, "Successfully modify QP to RTR");
+        fprintf(stderr, "Successfully modify QP to RTR\n");
     }
+
+    struct ibv_qp_attr rts_attr;
+    memset(&rts_attr, 0, sizeof(rts_attr));
+    rts_attr.qp_state = IBV_QPS_RTS;
+    rts_attr.timeout = 14;
+    rts_attr.retry_cnt = 7;
+    rts_attr.rnr_retry = 7;
+    rts_attr.sq_psn = HRD_DEFAULT_PSN;
+    rts_attr.max_rd_atomic = 16;
+    rts_attr.max_dest_rd_atomic = 16;
+    ret = ibv_modify_qp(cb->qp, &rts_attr, IBV_QP_STATE | IBV_QP_TIMEOUT | IBV_QP_RETRY_CNT
+                    | IBV_QP_RNR_RETRY | IBV_QP_SQ_PSN | IBV_QP_MAX_DEST_RD_ATOMIC
+                    | IBV_QP_MAX_QP_RD_ATOMIC);
+    CPE(ret != 0, "Failed to modify QP to RTS", ret);
+
+    if (cb->qp->state == IBV_QPS_RTS) {
+        fprintf(stderr, "Successfully modify QP to RTS");
+    }
+
+    return 0;
 }
 
 memcached_st* create_memc() {
@@ -110,7 +130,7 @@ memcached_st* create_memc() {
                                            REGISTRY_PORT, &rc);
 
     rc = memcached_server_push(memc, servers);
-    CPE(rc != MEMCACHED_SUCCESS, "failed to push memcached server");
+    CPE(rc != MEMCACHED_SUCCESS, "failed to push memcached server", rc);
 
     return memc;
 }
@@ -125,7 +145,7 @@ int hrd_publish_qp(struct hrd_ctrl_blk *cb, char *key) {
     memcached_return rc;
 
     rc = memcached_set(memc, key, strlen(key), (char*)&attr, sizeof(attr), 0, 0);
-    CPE(rc != MEMCACHED_SUCCESS, "failed to set key-value pair");
+    CPE(rc != MEMCACHED_SUCCESS, "failed to set key-value pair", rc);
 
     memcached_free(memc);
 

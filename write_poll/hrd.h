@@ -16,10 +16,10 @@
 #define REGISTRY_IP "192.168.2.1"
 #define REGISTRY_PORT 8888
 
-#define CPE(val, msg)                                                    \
+#define CPE(val, msg, ret)                                                    \
     if (val) {                                                           \
         fprintf(stderr, msg);                                            \
-        fprintf(stderr, " Error %d %s \n", errno, strerror(errno));      \
+        fprintf(stderr, " Error %d %s , ret value: %d\n", errno, strerror(errno), ret);      \
         exit(1);                                                         \
     }
 
