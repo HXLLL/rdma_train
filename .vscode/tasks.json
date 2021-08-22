@@ -1,33 +1,31 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "shell",
-			"label": "build write_poll",
-			"command": "cd write_poll; make",
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
-		},
-		{
-			"type": "shell",
-			"label": "test write_poll server",
-			"command": [
-				"cd write_poll;",
-				"make;",
-				"./server;",
-			],
-			// "command": "cd write_poll; make; ./server",
-			"args": [
-			],
-			"group": {
-				"kind": "test",
-				"isDefault": true
-			},
-		}
-	]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "build write_poll",
+            "command": "cd write_poll; make",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build", 
+                "isDefault": true,
+            }
+        },
+        {
+            "type": "shell",
+            "label": "test write_poll server",
+            "command": [
+                "cd write_poll;",
+                "make;",
+                "./server;"
+            ],
+            "args": [],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        }
+    ]
 }

@@ -18,8 +18,7 @@ int main() {
         }
     }
 
-    // hrd_connect_qp(cb, server_attr);
-    while (1);
+    hrd_connect_qp(cb, server_attr);
 
     return 0;
 }

@@ -108,10 +108,8 @@ int hrd_connect_qp(struct hrd_ctrl_blk *cb, struct host_attr *remote_qp_attr) {
     rts_attr.rnr_retry = 7;
     rts_attr.sq_psn = HRD_DEFAULT_PSN;
     rts_attr.max_rd_atomic = 16;
-    rts_attr.max_dest_rd_atomic = 16;
     ret = ibv_modify_qp(cb->qp, &rts_attr, IBV_QP_STATE | IBV_QP_TIMEOUT | IBV_QP_RETRY_CNT
-                    | IBV_QP_RNR_RETRY | IBV_QP_SQ_PSN | IBV_QP_MAX_DEST_RD_ATOMIC
-                    | IBV_QP_MAX_QP_RD_ATOMIC);
+                    | IBV_QP_RNR_RETRY | IBV_QP_SQ_PSN | IBV_QP_MAX_QP_RD_ATOMIC);
     CPE(ret != 0, "Failed to modify QP to RTS", ret);
 
     if (cb->qp->state == IBV_QPS_RTS) {
