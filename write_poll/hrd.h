@@ -11,6 +11,7 @@
 
 #define HRD_DEFAULT_PSN 2333
 
+#define BUFFER_SIZE 2048
 #define PORT_NUM 1
 #define GID_INDEX 3
 #define REGISTRY_IP "192.168.2.1"
@@ -38,12 +39,18 @@ struct hrd_ctrl_blk {
     struct ibv_cq *cq;
 
     struct ibv_qp *qp;
+
+    struct ibv_mr *mr;
+
+    void *buffer;
 };
 
 
 struct host_attr {
     union ibv_gid dgid;
     int qpn;
+    uint32_t rkey;
+    void *mr_addr;
 };
 
 struct hrd_ctrl_blk *hrd_ctrl_blk_init(

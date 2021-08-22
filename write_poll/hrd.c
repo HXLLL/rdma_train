@@ -32,6 +32,12 @@ struct hrd_ctrl_blk *hrd_ctrl_blk_init(
     cb->pd = ibv_alloc_pd(cb->ctx);                                     // set pd
     CPE(cb->pd == NULL, "Allocate PD Error: ", -1)
 
+    cb->buffer = malloc(BUFFER_SIZE);
+
+    cb->mr = ibv_reg_mr(cb->pd, cb->buffer, BUFFER_SIZE, IBV_ACCESS_LOCAL_WRITE 
+                         | IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE);
+    CPE(!cb->mr, "Error registering MR.", -1);
+
     hrd_create_qp(cb);                                                  // set cq, qp
 
     return cb;
@@ -138,6 +144,8 @@ int hrd_publish_qp(struct hrd_ctrl_blk *cb, char *key) {
     memset(&attr, 0, sizeof(attr));
     attr.dgid = cb->dgid;
     attr.qpn = cb->qp->qp_num;
+    attr.rkey = cb->mr->rkey;
+    attr.mr_addr = cb->mr->addr;
 
     memcached_st *memc = create_memc();
     memcached_return rc;

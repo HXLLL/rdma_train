@@ -19,8 +19,6 @@ int main() {
     }
     
     fprintf(stderr, "Successfully get client qp!\n");
-    hrd_dump_dgid(client_attr->dgid);
-    fprintf(stderr, "%d\n", client_attr->qpn);
 
     hrd_connect_qp(cb, client_attr);
 
