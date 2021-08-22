@@ -6,6 +6,8 @@ APPS	:= client server
 
 all: ${APPS}
 
+hrd.o: hrd.c hrd.h
+
 client: client.c hrd.o
 	$(LD) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
