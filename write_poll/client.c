@@ -31,13 +31,13 @@ void rdma_write_string(struct hrd_ctrl_blk *cb, struct host_attr *attr, char *s,
 int main() {
     fprintf(stderr, "Starting client...\n");
 
-    cb = hrd_ctrl_blk_init("mlx5_0", 3);
+    cb = hrd_ctrl_blk_init("mlx5_2", 3);
     
     hrd_publish_qp(cb, "client-qp");
 
     struct host_attr *server_attr = hrd_query_qp("server-qp");
     if (!server_attr) {
-        fprintf(stderr, "Waiting for erver...\n");
+        fprintf(stderr, "Waiting for server...\n");
         while (!server_attr) {
             server_attr = hrd_query_qp("server-qp");
             usleep(200000);
