@@ -49,7 +49,7 @@ int main() {
     send_buffer_mr = ibv_reg_mr(cb->pd, send_buffer, BUFFER_SIZE, IBV_ACCESS_LOCAL_WRITE);
     CPE(!send_buffer_mr, "Error registering send_buffer", -1);
 
-    int a = 998244353;
-    rdma_write_string(cb, server_attr, (char*)&a, 4, 0);
+    char *a = "hello world";
+    rdma_write_string(cb, server_attr, a, 11, 0);
     return 0;
 }
