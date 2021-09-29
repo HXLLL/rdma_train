@@ -4,7 +4,7 @@
         {
             "type": "shell",
             "label": "build write_poll",
-            "command": "cd write_poll; make",
+            "command": "./scripts/sync_build.sh",
             "problemMatcher": [
                 "$gcc"
             ],
