@@ -1,5 +1,6 @@
 CFLAGS	:= -g3 -Wall
 LD		:= gcc
+LD_ARM	:= aarch64-linux-gnu-gcc
 LDFLAGS	:= ${LDFLAGS} -libverbs -lmemcached
 
 APPS	:= client server
