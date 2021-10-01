@@ -15,8 +15,7 @@
 #define BLK_SIZE 16
 #define BUFFER_SIZE 2048
 #define PORT_NUM 1
-#define GID_INDEX 3
-#define REGISTRY_IP "192.168.2.1"
+#define REGISTRY_IP "162.105.16.151"
 #define REGISTRY_PORT 8888
 
 #define CPE(val, msg, ret)                                                    \

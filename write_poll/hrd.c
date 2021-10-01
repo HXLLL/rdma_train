@@ -115,7 +115,7 @@ int hrd_connect_qp(struct hrd_ctrl_blk *cb, struct host_attr *remote_qp_attr) {
     CPE(ret != 0, "Failed to modify QP to RTS", ret);
 
     if (cb->qp->state == IBV_QPS_RTS) {
-        fprintf(stderr, "Connection Successful\n");
+        fprintf(stderr, "Connection Successful (connect_qp)\n");
     }
 
     return 0;
