@@ -121,6 +121,16 @@ int hrd_connect_qp(struct hrd_ctrl_blk *cb, struct host_attr *remote_qp_attr) {
     return 0;
 }
 
+int reset_memcached() {
+    system("pkill memcached");
+    char port[8];
+    sprintf(port, "%d", REGISTRY_PORT);
+    if (fork()==0) {
+        execl("/usr/bin/screen", "screen", "-d", "-m", "memcached", "-p", port, "-u", "root", NULL);
+    }
+    usleep(100000);
+}
+
 memcached_st* create_memc() {
     memcached_server_st *servers = NULL;
     memcached_st *memc = memcached_create(NULL);
@@ -147,6 +157,11 @@ int hrd_publish_qp(struct hrd_ctrl_blk *cb, char *key) {
     memcached_return rc;
 
     rc = memcached_set(memc, key, strlen(key), (char*)&attr, sizeof(attr), 0, 0);
+
+    if (rc != MEMCACHED_SUCCESS) {
+        rc = memcached_set(memc, key, strlen(key), (char *)&attr, sizeof(attr), 0, 0);
+    }
+
     CPE(rc != MEMCACHED_SUCCESS, "failed to set key-value pair", rc);
 
     memcached_free(memc);

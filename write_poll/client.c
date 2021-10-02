@@ -34,7 +34,7 @@ void rdma_write_string(struct hrd_ctrl_blk *cb, struct host_attr *attr, char *s,
 int main() {
     fprintf(stderr, "Starting client...\n");
 
-    cb = hrd_ctrl_blk_init("mlx5_1", 0);
+    cb = hrd_ctrl_blk_init("mlx5_0", 0);
     
     hrd_publish_qp(cb, "client-qp");
 

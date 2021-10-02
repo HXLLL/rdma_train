@@ -15,7 +15,7 @@
 #define BLK_SIZE 16
 #define BUFFER_SIZE 2048
 #define PORT_NUM 1
-#define REGISTRY_IP "162.105.16.151"
+#define REGISTRY_IP "192.168.100.1"
 #define REGISTRY_PORT 8888
 
 #define CPE(val, msg, ret)                                                    \
@@ -60,6 +60,7 @@ struct hrd_ctrl_blk *hrd_ctrl_blk_init(
 int hrd_create_qp(struct hrd_ctrl_blk *cb);
 int hrd_connect_qp(struct hrd_ctrl_blk *cb, struct host_attr *remote_qp_attr);
 
+int reset_memcached();
 memcached_st* create_memc();
 int hrd_publish_qp(struct hrd_ctrl_blk *cb, char *key);
 struct host_attr *hrd_query_qp(char *key);

@@ -5,7 +5,9 @@ struct hrd_ctrl_blk *cb;
 int main() { 
     fprintf(stderr, "Starting server...\n");
 
-    cb = hrd_ctrl_blk_init("mlx5_3", 0);
+    cb = hrd_ctrl_blk_init("mlx5_0", 0);
+
+    reset_memcached();
 
     hrd_publish_qp(cb, "server-qp");
 
