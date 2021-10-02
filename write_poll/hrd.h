@@ -9,6 +9,8 @@
 #include <infiniband/verbs.h> 
 #include <libmemcached/memcached.h>
 
+#define LINK_TYPE 0         // 0 for IB, 1 for RoCE
+
 #define HRD_DEFAULT_PSN 2333
 
 #define MAX_OUT 16
@@ -28,6 +30,8 @@
 struct hrd_ctrl_blk { 
     union ibv_gid dgid;
     int gid_index;
+
+    uint16_t dlid;
 
     struct ibv_context *ctx;
     char *dev_name;
@@ -49,6 +53,7 @@ struct hrd_ctrl_blk {
 
 struct host_attr {
     union ibv_gid dgid;
+    uint16_t dlid;
     int qpn;
     uint32_t rkey;
     void *mr_addr;

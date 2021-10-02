@@ -1,5 +1,16 @@
 #include "hrd.h"
 
+int hrd_get_local_id(struct hrd_ctrl_blk *cb, int port_id) {
+    struct ibv_port_attr attr;
+
+    if (ibv_query_port(cb->ctx, port_id, &attr)) {
+        fprintf(stderr, "Error getting port info, %s\n", strerror(errno));
+        exit(1);
+    }
+
+    return attr.lid;
+}
+
 struct hrd_ctrl_blk *hrd_ctrl_blk_init(
     char* dev_name, int gid_index
 ) {
@@ -25,6 +36,8 @@ struct hrd_ctrl_blk *hrd_ctrl_blk_init(
     }
     ibv_free_device_list(devices);
     CPE(cb->ctx == NULL, "Error opening device", -1);
+
+    cb->dlid = hrd_get_local_id(cb, PORT_NUM);
 
     cb->gid_index = gid_index;
     ibv_query_gid(cb->ctx, PORT_NUM, gid_index, &cb->dgid);             // set dgid, gid_index
@@ -87,12 +100,19 @@ int hrd_connect_qp(struct hrd_ctrl_blk *cb, struct host_attr *remote_qp_attr) {
     rtr_attr.dest_qp_num = remote_qp_attr->qpn;
     rtr_attr.rq_psn = HRD_DEFAULT_PSN;
 
+#if LINK_TYPE == 1
     rtr_attr.ah_attr.is_global = 1;
     rtr_attr.ah_attr.sl = 0;
     rtr_attr.ah_attr.port_num = PORT_NUM;
     rtr_attr.ah_attr.grh.dgid = remote_qp_attr->dgid;
     rtr_attr.ah_attr.grh.hop_limit = 1;
     rtr_attr.ah_attr.grh.sgid_index = cb->gid_index;
+#else
+    rtr_attr.ah_attr.is_global = 0;
+    rtr_attr.ah_attr.sl = 0;
+    rtr_attr.ah_attr.port_num = PORT_NUM;
+    rtr_attr.ah_attr.dlid = remote_qp_attr->dlid;
+#endif
 
     rtr_attr.max_dest_rd_atomic = 16;
     rtr_attr.min_rnr_timer = 12;
@@ -148,6 +168,7 @@ memcached_st* create_memc() {
 int hrd_publish_qp(struct hrd_ctrl_blk *cb, char *key) { 
     struct host_attr attr;
     memset(&attr, 0, sizeof(attr));
+    attr.dlid = cb->dlid;
     attr.dgid = cb->dgid;
     attr.qpn = cb->qp->qp_num;
     attr.rkey = cb->mr->rkey;
